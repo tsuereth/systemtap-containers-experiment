@@ -1,0 +1,43 @@
+--- systemtap/configure
++++ systemtap/configure
+@@ -13391,37 +13391,9 @@
+ # Use boost::string_ref if available; moot with PR32788
+ # AC_CHECK_HEADERS([boost/utility/string_ref.hpp])
+
+-# add boost_system bits for stapdyn with dyninst 10+
+-saved_LIBS="$LIBS"
+-LIBS="-lboost_system $LIBS"
+-{ printf "%s\n" "$as_me:${as_lineno-$LINENO}: checking need for -lboost_system library" >&5
+-printf %s "checking need for -lboost_system library... " >&6; }
+-cat confdefs.h - <<_ACEOF >conftest.$ac_ext
+-/* end confdefs.h.  */
+-
+-#include <boost/system/system_error.hpp>
+-int main() {
+-   boost::system::error_condition e();
+-}
+-
+-_ACEOF
+-if ac_fn_cxx_try_link "$LINENO"
+-then :
+-  { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: yup" >&5
+-printf "%s\n" "yup" >&6; }
+-    BOOST_SYSTEM_LIB="-lboost_system"
+-
+-else case e in #(
+-  e) { printf "%s\n" "$as_me:${as_lineno-$LINENO}: result: nope" >&5
+-printf "%s\n" "nope" >&6; }
+-    BOOST_SYSTEM_LIB=""
+- ;;
+-esac
+-fi
+-rm -f core conftest.err conftest.$ac_objext conftest.beam \
+-    conftest$ac_exeext conftest.$ac_ext
+-LIBS="$saved_LIBS"
+-
++# REMOVED: boost_system link arg
++# Added in commit 891810c246d6de05a2df80c5b3e9f9aaa13231f7
++# This may affect runtime behavior of stapdyn!
+
+ ac_ext=c
+ ac_cpp='$CPP $CPPFLAGS'

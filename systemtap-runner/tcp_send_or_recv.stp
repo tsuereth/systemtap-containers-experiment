@@ -1,0 +1,22 @@
+#!/usr/bin/env stap
+
+probe tcp.sendmsg {
+	saddr = format_ipaddr(__ip_sock_saddr(sock), __ip_sock_family(sock))
+	sport = __tcp_sock_sport(sock)
+	daddr = format_ipaddr(__ip_sock_daddr(sock), __ip_sock_family(sock))
+	dport = __tcp_sock_dport(sock)
+
+	printf("TCP send (%d %s) %s:%d %d bytes --> %s:%d\n",
+		pid(), execname(),
+		saddr, sport,
+		size,
+		daddr, dport)
+}
+
+probe tcp.recvmsg {
+	printf("TCP recv (%d %s) %s:%d %d bytes <-- %s:%d\n",
+		pid(), execname(),
+		saddr, sport,
+		size,
+		daddr, dport)
+}
