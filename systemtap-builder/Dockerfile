@@ -13,8 +13,6 @@ RUN patch -p0 < /remove-libboost_system.patch
 
 ARG INSTALL_PREFIX=/var/systemtap
 ENV INSTALL_PREFIX_ARG=${INSTALL_PREFIX}
-ARG INSTALL_CHOWN
-ENV INSTALL_CHOWN_ARG=${INSTALL_CHOWN}
 RUN <<EOF cat > /build-systemtap.sh
 #!/usr/bin/env sh
 set -e
@@ -24,10 +22,11 @@ cd systemtap && \
 	make && \
 	make install
 
-if [ ! -z "${INSTALL_CHOWN_ARG}" ]; then
-	echo "chown -R ${INSTALL_CHOWN_ARG} ${INSTALL_PREFIX_ARG}"
-	chown -R ${INSTALL_CHOWN_ARG} ${INSTALL_PREFIX_ARG}
-fi
+# Produce reusable output artifacts in /systemtap-builddir
+# which the docker host should have volume mounted, to persist those outputs.
+mkdir -p /systemtap-builddir
+echo -n "${INSTALL_PREFIX_ARG}" > /systemtap-builddir/.systemtap-build.prefix
+tar -czf /systemtap-builddir/.systemtap-build.tar.gz -C / ${INSTALL_PREFIX_ARG}
 EOF
 RUN chmod +x /build-systemtap.sh
 ENTRYPOINT ["/build-systemtap.sh"]
