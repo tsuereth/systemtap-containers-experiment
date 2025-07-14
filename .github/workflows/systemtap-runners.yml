@@ -22,9 +22,9 @@ jobs:
         run: |
           rm -rf ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
           mkdir -p ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
-          docker build -f systemtap-builder/Dockerfile -t systemtap-builder --build-arg SOURCE_BRANCH=${{ env.SYSTEMTAP_SOURCE_BRANCH }} --build-arg INSTALL_PREFIX=${{ env.SYSTEMTAP_INSTALL_PREFIX }} ./systemtap-builder
+          docker build -f systemtap-builder/Dockerfile -t systemtap-builder --build-arg SOURCE_BRANCH=${{ env.SYSTEMTAP_SOURCE_BRANCH }} --build-arg INSTALL_PREFIX=${{ env.SYSTEMTAP_INSTALL_PREFIX }} --build-arg INSTALL_CHOWN=$(id -u):$(id -g) ./systemtap-builder
           docker run --rm -v ${{ env.SYSTEMTAP_INSTALL_PREFIX }}:${{ env.SYSTEMTAP_INSTALL_PREFIX }} systemtap-builder
-          tar -czf systemtap-runner/.systemtap-build.tar.gz ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
+          tar -czf systemtap-runner/.systemtap-build.tar.gz -C / ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
 
       - name: "GitHub Packages registry login"
         uses: docker/login-action@v3
