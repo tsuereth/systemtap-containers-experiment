@@ -8,7 +8,7 @@ on:
 
 env:
   SYSTEMTAP_SOURCE_BRANCH: release-5.3
-  SYSTEMTAP_INSTALL_PREFIX: /var/systemtap-build-5.3
+  SYSTEMTAP_INSTALL_PREFIX: $GITHUB_WORKSPACE/systemtap-build-5.3
   S6_OVERLAY_VERSION: 3.2.1.0
 
 jobs:
