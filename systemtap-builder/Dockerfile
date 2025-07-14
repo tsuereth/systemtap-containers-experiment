@@ -25,6 +25,7 @@ cd systemtap && \
 	make install
 
 if [ ! -z "${INSTALL_CHOWN_ARG}" ]; then
+	echo "chown -R ${INSTALL_CHOWN_ARG} ${INSTALL_PREFIX_ARG}"
 	chown -R ${INSTALL_CHOWN_ARG} ${INSTALL_PREFIX_ARG}
 fi
 EOF
