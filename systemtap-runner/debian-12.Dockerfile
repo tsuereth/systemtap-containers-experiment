@@ -11,7 +11,7 @@ ADD stap-run.sh /etc/services.d/stap/run
 # Force a rebuild of this container image if the kernel version changes.
 # Debug symbols MUST be redownloaded for the specific kernel version!
 ARG KERNEL_VERSION
-ENV SYSTEMTAP_KERNEL_VERSION=${KERNEL_VERSION}
+ENV KERNEL_VERSION_ARG=${KERNEL_VERSION}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
@@ -33,7 +33,7 @@ EOF
 # - kernel debug symbols (from linux-image-VERSION-dbg) are missed by stap-prep.
 # - xz archive support (from xz-utils) is needed to decompress s6-overlay.
 RUN apt update && \
-	apt install -y lsb-release libdw1 linux-image-${KERNEL_VERSION}-dbg xz-utils
+	apt install -y lsb-release libdw1 linux-image-${KERNEL_VERSION_ARG:-$(uname -r)}-dbg xz-utils
 
 # Add + unpack the previously-built systemtap package,
 # then run `stap-prep` to prepare remaining runtime dependencies.

@@ -35,7 +35,10 @@ fi
 
 # The systemtap-runner image is specific to the host's kernel version,
 # since systemtap itself has kernel-version-specific dependencies.
-KERNEL_VERSION=$(uname -r)
+if [ -z "${KERNEL_VERSION}" ]; then
+	KERNEL_VERSION=$(uname -r)
+	echo "No KERNEL_VERSION was specified, using the current version: ${KERNEL_VERSION}"
+fi
 
 # This script's first command-line argument must be a systemtap `.stp` script file.
 # That .stp file will be mounted by the runner image when it starts.
@@ -48,7 +51,7 @@ STP_FILEPATH_REALPATH=$(realpath ${STP_FILEPATH})
 
 docker build \
 	-f systemtap-runner/${RUNTIME_VERSION}.Dockerfile \
-	-t systemtap-runner/systemtap-runner-${RUNTIME_VERSION} \
+	-t systemtap-runner-${RUNTIME_VERSION} \
 	--build-arg S6_OVERLAY_VERSION=${S6_OVERLAY_VERSION} \
 	--build-arg KERNEL_VERSION=${KERNEL_VERSION} \
 	--build-arg SYSTEMTAP_PREFIX=${SYSTEMTAP_PREFIX} \

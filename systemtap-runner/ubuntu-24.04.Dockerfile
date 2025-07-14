@@ -11,7 +11,7 @@ ADD stap-run.sh /etc/services.d/stap/run
 # Force a rebuild of this container image if the kernel version changes.
 # Debug symbols MUST be redownloaded for the specific kernel version!
 ARG KERNEL_VERSION
-ENV SYSTEMTAP_KERNEL_VERSION=${KERNEL_VERSION}
+ENV KERNEL_VERSION_ARG=${KERNEL_VERSION}
 
 ENV DEBIAN_FRONTEND=noninteractive
 
