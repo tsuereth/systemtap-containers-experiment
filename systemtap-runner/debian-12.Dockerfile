@@ -38,7 +38,7 @@ RUN apt update && \
 # Add + unpack the previously-built systemtap package,
 # then run `stap-prep` to prepare remaining runtime dependencies.
 ARG SYSTEMTAP_PREFIX
-ADD systemtap-build.tar.gz /
+ADD .systemtap-build.tar.gz /
 ENV PATH="$PATH:${SYSTEMTAP_PREFIX}/bin"
 RUN stap-prep
 
