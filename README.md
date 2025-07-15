@@ -38,7 +38,19 @@ The docker container definitions here require, well, Docker. Best practices and 
 
 ## For prepared runner environments
 
-*NOT YET DOCUMENTED: docker pull and run instructions*
+*NOTE: As of writing, using a pre-built runner image is not advised. Also, only one [pre-built image exists](https://github.com/tsuereth?tab=packages&repo_name=systemtap-containers-experiment), for ubuntu-24.04*
+
+Pull and run the container image appropriate for your host distribution and release, using `docker run` arguments like the below:
+
+```bash
+sudo docker pull ghcr.io/tsuereth/systemtap-runner-ubuntu-24.04
+sudo docker run --rm \
+	--privileged \
+	--mount type=bind,source=/sys/kernel/debug,target=/sys/kernel/debug,readonly \
+	--mount type=bind,source=${STP_FILEPATH_REALPATH},target=/run.stp,readonly \
+	--name systemtap-runner \
+	tsuereth/systemtap-runner-ubuntu-24.04
+```
 
 ## For new runner environments
 
@@ -54,7 +66,7 @@ In more detail:
 
 - And subsequently `docker run`s that container with a volume mountpoint into the host, so that its build output (the systemtap build/installation) will land on the host.
 
-- Finally the script produces a small text file recording the install-prefix of this systemtap build (i.e. where systemtap expects to find its own installation files) and a compressed archive of the build's artifacts.
+- The container's build script will ultimately produce two outputs: a small text file recording the install-prefix of this systemtap build (i.e. where systemtap expects to find its own installation files) and a compressed archive of the build's artifacts.
 
 Those final outputs are used as inputs by the next (runner) step, through both steps' `BUILD_PREFIX_FILEPATH` and `BUILD_ARCHIVE_FILEPATH` variables.
 
@@ -133,6 +145,8 @@ Removing the `-lboost_system` runtime dependency was the simplest way to avoid u
 There probably won't be any; the author no longer needs this.
 
 That said, there are many potential improvements to this approach for rapidly-initializing systemtap, including but not limited to:
+
+- Kernel release-match confirmation in prepared "runner" images, to ensure that the `$(uname -r)` used when preparing the runner (installing headers and debug symbols) matches your current host. *Note that this will effectively invalidate current GitHub Actions-prepared runners, as those kernel builds don't exactly match typical end-user systems.*
 
 - A simple helper/wrapper for selecting a host-appropriate "runner" i.e. to detect debian-12 versus ubuntu-24.04 in the host.
 
