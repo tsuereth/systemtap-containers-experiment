@@ -34,12 +34,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Extract systemtap-runner-ubuntu-24.04 metadata"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/tsuereth/systemtap-runner-ubuntu-24.04
+
       - name: "Build and push systemtap-runner-ubuntu-24.04"
         uses: docker/build-push-action@v6
         with:
           push: true
           file: systemtap-runner/ubuntu-24.04.Dockerfile
-          tags: tsuereth/systemtap-runner-ubuntu-24.04:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             S6_OVERLAY_VERSION=${{ env.S6_OVERLAY_VERSION }}
             SYSTEMTAP_PREFIX=${{ env.SYSTEMTAP_INSTALL_PREFIX }}
