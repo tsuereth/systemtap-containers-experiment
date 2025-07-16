@@ -36,11 +36,19 @@ Not only systemtap's probe behavior, but also its *code-generation behavior* dep
 
 The docker container definitions here require, well, Docker. Best practices and personal preferences for Docker setup will vary; consult [Docker's documentation](https://docs.docker.com/engine/install/) for recommendations based on your environment.
 
-## For prepared runner environments
+## For pre-built runner environments
 
-*NOT YET DOCUMENTED: docker pull and run instructions*
+**There are none.** :(
 
-## For new runner environments
+Hypothetically, this repository can use GitHub Actions workflows to prepare runner images for some set of Linux releases, so that you could e.g. `docker pull` a `systemtap-runner-ubuntu-24.04` image and run it immediately.
+
+In practice however, this isn't feasible because GitHub Actions build agents are using kernels intended for cloud service orchestration; for example, the Ubuntu 24.04 actions runner uses Linux kernel `6.11.[...]-azure`.
+
+Since this isn't an exact match for a typical end-user Ubuntu 24.04 installation (with e.g. Linux kernel `6.11.[...]-generic`), an end-user's host won't be able to use the systemtap installation in a GitHub Actions-built image.
+
+*Possible future follow-ups: custom build agents which more closely resemble end-user environments; or attempt to selectively reconfigure/reinstall parts of the systemtap runner based on the running host's kernel release.*
+
+## Building your own runner environment
 
 1. Build systemtap
 
@@ -54,7 +62,7 @@ In more detail:
 
 - And subsequently `docker run`s that container with a volume mountpoint into the host, so that its build output (the systemtap build/installation) will land on the host.
 
-- Finally the script produces a small text file recording the install-prefix of this systemtap build (i.e. where systemtap expects to find its own installation files) and a compressed archive of the build's artifacts.
+- The container's build script will ultimately produce two outputs: a small text file recording the install-prefix of this systemtap build (i.e. where systemtap expects to find its own installation files) and a compressed archive of the build's artifacts.
 
 Those final outputs are used as inputs by the next (runner) step, through both steps' `BUILD_PREFIX_FILEPATH` and `BUILD_ARCHIVE_FILEPATH` variables.
 
@@ -133,6 +141,8 @@ Removing the `-lboost_system` runtime dependency was the simplest way to avoid u
 There probably won't be any; the author no longer needs this.
 
 That said, there are many potential improvements to this approach for rapidly-initializing systemtap, including but not limited to:
+
+- Kernel release-match confirmation in prepared "runner" images, to ensure that the `$(uname -r)` used when preparing the runner (installing headers and debug symbols) matches your current host. (Currently, a kernel release-mismatch between your host and the runner will result in unclear runtime errors; this should fail faster with a clear indication of the problem.)
 
 - A simple helper/wrapper for selecting a host-appropriate "runner" i.e. to detect debian-12 versus ubuntu-24.04 in the host.
 

@@ -1,30 +1,30 @@
 name: "Build systemtap-runner-ubuntu-24.04"
 
+# NOTE: The result of this workflow isn't practically useful,
+# so it isn't expected to run automatically (or ... ever).
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 env:
   SYSTEMTAP_SOURCE_BRANCH: release-5.3
-  SYSTEMTAP_INSTALL_PREFIX: /var/systemtap-build-5.3
+  SYSTEMTAP_INSTALL_PREFIX: /var/systemtap-5.3
   S6_OVERLAY_VERSION: 3.2.1.0
 
 jobs:
   build:
     runs-on: ubuntu-24.04
+    permissions:
+      packages: write
     steps:
       - name: "Checkout"
         uses: actions/checkout@v4
 
       - name: "Build systemtap"
         run: |
-          rm -rf ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
-          mkdir -p ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
           docker build -f systemtap-builder/Dockerfile -t systemtap-builder --build-arg SOURCE_BRANCH=${{ env.SYSTEMTAP_SOURCE_BRANCH }} --build-arg INSTALL_PREFIX=${{ env.SYSTEMTAP_INSTALL_PREFIX }} ./systemtap-builder
-          docker run --rm -v ${{ env.SYSTEMTAP_INSTALL_PREFIX }}:${{ env.SYSTEMTAP_INSTALL_PREFIX }} systemtap-builder
-          tar -czf systemtap-runner/.systemtap-build.tar.gz -C / ${{ env.SYSTEMTAP_INSTALL_PREFIX }}
+          mkdir -p /tmp/systemtap-build
+          docker run --rm -v /tmp/systemtap-build:/systemtap-builddir systemtap-builder
+          cp /tmp/systemtap-build/.systemtap-build.tar.gz ./systemtap-runner/
 
       - name: "GitHub Packages registry login"
         uses: docker/login-action@v3
@@ -33,12 +33,19 @@ jobs:
           username: ${{ github.actor }}
           password: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: "Extract systemtap-runner-ubuntu-24.04 metadata"
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/tsuereth/systemtap-runner-ubuntu-24.04
+
       - name: "Build and push systemtap-runner-ubuntu-24.04"
         uses: docker/build-push-action@v6
         with:
           push: true
           file: systemtap-runner/ubuntu-24.04.Dockerfile
-          tags: tsuereth/systemtap-runner-ubuntu-24.04:latest
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
           build-args: |
             S6_OVERLAY_VERSION=${{ env.S6_OVERLAY_VERSION }}
             SYSTEMTAP_PREFIX=${{ env.SYSTEMTAP_INSTALL_PREFIX }}
