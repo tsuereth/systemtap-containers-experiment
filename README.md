@@ -36,23 +36,19 @@ Not only systemtap's probe behavior, but also its *code-generation behavior* dep
 
 The docker container definitions here require, well, Docker. Best practices and personal preferences for Docker setup will vary; consult [Docker's documentation](https://docs.docker.com/engine/install/) for recommendations based on your environment.
 
-## For prepared runner environments
+## For pre-built runner environments
 
-*NOTE: As of writing, using a pre-built runner image is not advised. Also, only one [pre-built image exists](https://github.com/tsuereth?tab=packages&repo_name=systemtap-containers-experiment), for ubuntu-24.04*
+**There are none.** :(
 
-Pull and run the container image appropriate for your host distribution and release, using `docker run` arguments like the below:
+Hypothetically, this repository can use GitHub Actions workflows to prepare runner images for some set of Linux releases, so that you could e.g. `docker pull` a `systemtap-runner-ubuntu-24.04` image and run it immediately.
 
-```bash
-sudo docker pull ghcr.io/tsuereth/systemtap-runner-ubuntu-24.04
-sudo docker run --rm \
-	--privileged \
-	--mount type=bind,source=/sys/kernel/debug,target=/sys/kernel/debug,readonly \
-	--mount type=bind,source=${STP_FILEPATH_REALPATH},target=/run.stp,readonly \
-	--name systemtap-runner \
-	tsuereth/systemtap-runner-ubuntu-24.04
-```
+In practice however, this isn't feasible because GitHub Actions build agents are using kernels intended for cloud service orchestration; for example, the Ubuntu 24.04 actions runner uses Linux kernel `6.11.[...]-azure`.
 
-## For new runner environments
+Since this isn't an exact match for a typical end-user Ubuntu 24.04 installation (with e.g. Linux kernel `6.11.[...]-generic`), an end-user's host won't be able to use the systemtap installation in a GitHub Actions-built image.
+
+*Possible future follow-ups: custom build agents which more closely resemble end-user environments; or attempt to selectively reconfigure/reinstall parts of the systemtap runner based on the running host's kernel release.*
+
+## Building your own runner environment
 
 1. Build systemtap
 
@@ -146,7 +142,7 @@ There probably won't be any; the author no longer needs this.
 
 That said, there are many potential improvements to this approach for rapidly-initializing systemtap, including but not limited to:
 
-- Kernel release-match confirmation in prepared "runner" images, to ensure that the `$(uname -r)` used when preparing the runner (installing headers and debug symbols) matches your current host. *Note that this will effectively invalidate current GitHub Actions-prepared runners, as those kernel builds don't exactly match typical end-user systems.*
+- Kernel release-match confirmation in prepared "runner" images, to ensure that the `$(uname -r)` used when preparing the runner (installing headers and debug symbols) matches your current host. (Currently, a kernel release-mismatch between your host and the runner will result in unclear runtime errors; this should fail faster with a clear indication of the problem.)
 
 - A simple helper/wrapper for selecting a host-appropriate "runner" i.e. to detect debian-12 versus ubuntu-24.04 in the host.
 

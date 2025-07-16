@@ -1,10 +1,9 @@
 name: "Build systemtap-runner-ubuntu-24.04"
 
+# NOTE: The result of this workflow isn't practically useful,
+# so it isn't expected to run automatically (or ... ever).
 on:
   workflow_dispatch:
-  push:
-    branches:
-      - main
 
 env:
   SYSTEMTAP_SOURCE_BRANCH: release-5.3
